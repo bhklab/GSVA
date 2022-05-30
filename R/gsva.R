@@ -21,22 +21,22 @@ setMethod("gsva", signature(expr="HDF5Array", gset.idx.list="list"),
 {
   method <- match.arg(method)
   kcdf <- match.arg(kcdf)
-  
+
   warning("Using 'HDF5Array' objects as input is still in an experimental stage.")
 
   ## filter genes according to verious criteria,
   ## e.g., constant expression
   expr <- .filterFeatures(expr, method)
-  
+
   ## map to the actual features for which expression data is available
   mapped.gset.idx.list <- .mapGeneSetsToFeatures(gset.idx.list, rownames(expr))
-  
+
   ## remove gene sets from the analysis for which no features are available
   ## and meet the minimum and maximum gene-set size specified by the user
   mapped.gset.idx.list <- filterGeneSets(mapped.gset.idx.list,
                                          min.sz=max(1, min.sz),
                                          max.sz=max.sz)
-  
+
   if (!missing(kcdf)) {
     if (kcdf == "Gaussian") {
       rnaseq <- FALSE
@@ -47,10 +47,10 @@ setMethod("gsva", signature(expr="HDF5Array", gset.idx.list="list"),
     } else
       kernel <- FALSE
   }
-  
+
   rval <- .gsva(expr, mapped.gset.idx.list, method, kcdf, rnaseq, abs.ranking,
                 parallel.sz, mx.diff, tau, kernel, ssgsea.norm, verbose, BPPARAM)
-  
+
   rval
 })
 
@@ -61,7 +61,7 @@ setMethod("gsva", signature(expr="SingleCellExperiment", gset.idx.list="list"),
   abs.ranking=FALSE,
   min.sz=1,
   max.sz=Inf,
-  parallel.sz=1L, 
+  parallel.sz=1L,
   mx.diff=TRUE,
   tau=switch(method, gsva=1, ssgsea=0.25, NA),
   ssgsea.norm=TRUE,
@@ -70,40 +70,40 @@ setMethod("gsva", signature(expr="SingleCellExperiment", gset.idx.list="list"),
 {
   method <- match.arg(method)
   kcdf <- match.arg(kcdf)
-  
+
   warning("Using 'SingleCellExperiment' objects as input is still in an experimental stage.")
 
   if (length(assays(expr)) == 0L)
     stop("The input SummarizedExperiment object has no assay data.")
-  
+
   se <- expr
-  
+
   if (missing(annotation))
     annotation <- names(assays(se))[1]
   else {
     if (!is.character(annotation))
       stop("The 'annotation' argument must contain a character string.")
     annotation <- annotation[1]
-    
+
     if (!annotation %in% names(assays(se)))
       stop(sprintf("Assay %s not found in the input SummarizedExperiment object.", annotation))
   }
   expr <- assays(se)[[annotation]]
-  
+
   ## filter genes according to various criteria,
   ## e.g., constant expression
-  
+
   expr <- .filterFeatures(expr, method)
-  
+
   ## map to the actual features for which expression data is available
   mapped.gset.idx.list <- .mapGeneSetsToFeatures(gset.idx.list, rownames(expr))
-  
+
   ## remove gene sets from the analysis for which no features are available
   ## and meet the minimum and maximum gene-set size specified by the user
   mapped.gset.idx.list <- filterGeneSets(mapped.gset.idx.list,
                                          min.sz=max(1, min.sz),
                                          max.sz=max.sz)
-  
+
   if (!missing(kcdf)) {
     if (kcdf == "Gaussian") {
       rnaseq <- FALSE
@@ -114,18 +114,18 @@ setMethod("gsva", signature(expr="SingleCellExperiment", gset.idx.list="list"),
     } else
       kernel <- FALSE
   }
-  
+
   eSco <- .gsva(expr, mapped.gset.idx.list, method, kcdf, rnaseq, abs.ranking,
-                parallel.sz, mx.diff, tau, kernel, ssgsea.norm, verbose, BPPARAM) 
-  
+                parallel.sz, mx.diff, tau, kernel, ssgsea.norm, verbose, BPPARAM)
+
   rval <- SingleCellExperiment(assays=SimpleList(es=eSco),
                                colData=colData(se),
                                metadata=metadata(se))
   metadata(rval)$annotation <- NULL
-  
+
   rval
           })
-          
+
 setMethod("gsva", signature(expr="dgCMatrix", gset.idx.list="list"),
           function(expr, gset.idx.list, annotation,
   method=c("gsva", "ssgsea", "zscore", "plage"),
@@ -142,22 +142,22 @@ setMethod("gsva", signature(expr="dgCMatrix", gset.idx.list="list"),
 {
   method <- match.arg(method)
   kcdf <- match.arg(kcdf)
-  
+
   warning("Using 'dgCMatrix' objects as input is still in an experimental stage.")
 
   ## filter genes according to verious criteria,
   ## e.g., constant expression
   expr <- .filterFeatures(expr, method)
-  
+
   ## map to the actual features for which expression data is available
   mapped.gset.idx.list <- .mapGeneSetsToFeatures(gset.idx.list, rownames(expr))
-  
+
   ## remove gene sets from the analysis for which no features are available
   ## and meet the minimum and maximum gene-set size specified by the user
   mapped.gset.idx.list <- filterGeneSets(mapped.gset.idx.list,
                                          min.sz=max(1, min.sz),
                                          max.sz=max.sz)
-  
+
   if (!missing(kcdf)) {
     if (kcdf == "Gaussian") {
       rnaseq <- FALSE
@@ -168,10 +168,10 @@ setMethod("gsva", signature(expr="dgCMatrix", gset.idx.list="list"),
     } else
       kernel <- FALSE
   }
-  
+
   rval <- .gsva(expr, mapped.gset.idx.list, method, kcdf, rnaseq, abs.ranking,
                 parallel.sz, mx.diff, tau, kernel, ssgsea.norm, verbose, BPPARAM)
-  
+
   rval
 })
 
@@ -182,7 +182,7 @@ setMethod("gsva", signature(expr="SummarizedExperiment", gset.idx.list="GeneSetC
   abs.ranking=FALSE,
   min.sz=1,
   max.sz=Inf,
-  parallel.sz=1L, 
+  parallel.sz=1L,
   mx.diff=TRUE,
   tau=switch(method, gsva=1, ssgsea=0.25, NA),
   ssgsea.norm=TRUE,
@@ -232,7 +232,7 @@ setMethod("gsva", signature(expr="SummarizedExperiment", gset.idx.list="GeneSetC
           "Attempting to directly match identifiers in 'expr' to gene sets.", sep="\n")
     }
   }
-  mapped.gset.idx.list <- geneIds(mapped.gset.idx.list) 
+  mapped.gset.idx.list <- geneIds(mapped.gset.idx.list)
 
   ## map to the actual features for which expression data is available
   mapped.gset.idx.list <- .mapGeneSetsToFeatures(mapped.gset.idx.list, rownames(expr))
@@ -255,7 +255,7 @@ setMethod("gsva", signature(expr="SummarizedExperiment", gset.idx.list="GeneSetC
   }
 
   eSco <- .gsva(expr, mapped.gset.idx.list, method, kcdf, rnaseq, abs.ranking,
-                parallel.sz, mx.diff, tau, kernel, ssgsea.norm, verbose, BPPARAM) 
+                parallel.sz, mx.diff, tau, kernel, ssgsea.norm, verbose, BPPARAM)
 
   rval <- SummarizedExperiment(assays=SimpleList(es=eSco),
                                colData=colData(se),
@@ -272,7 +272,7 @@ setMethod("gsva", signature(expr="SummarizedExperiment", gset.idx.list="list"),
   abs.ranking=FALSE,
   min.sz=1,
   max.sz=Inf,
-  parallel.sz=1L, 
+  parallel.sz=1L,
   mx.diff=TRUE,
   tau=switch(method, gsva=1, ssgsea=0.25, NA),
   ssgsea.norm=TRUE,
@@ -304,7 +304,7 @@ setMethod("gsva", signature(expr="SummarizedExperiment", gset.idx.list="list"),
 
   ## map to the actual features for which expression data is available
   mapped.gset.idx.list <- .mapGeneSetsToFeatures(gset.idx.list, rownames(expr))
-  
+
   ## remove gene sets from the analysis for which no features are available
   ## and meet the minimum and maximum gene-set size specified by the user
   mapped.gset.idx.list <- filterGeneSets(mapped.gset.idx.list,
@@ -323,7 +323,7 @@ setMethod("gsva", signature(expr="SummarizedExperiment", gset.idx.list="list"),
   }
 
   eSco <- .gsva(expr, mapped.gset.idx.list, method, kcdf, rnaseq, abs.ranking,
-                parallel.sz, mx.diff, tau, kernel, ssgsea.norm, verbose, BPPARAM) 
+                parallel.sz, mx.diff, tau, kernel, ssgsea.norm, verbose, BPPARAM)
 
   rval <- SummarizedExperiment(assays=SimpleList(es=eSco),
                                colData=colData(se),
@@ -340,7 +340,7 @@ setMethod("gsva", signature(expr="ExpressionSet", gset.idx.list="list"),
   abs.ranking=FALSE,
   min.sz=1,
   max.sz=Inf,
-  parallel.sz=1L, 
+  parallel.sz=1L,
   mx.diff=TRUE,
   tau=switch(method, gsva=1, ssgsea=0.25, NA),
   ssgsea.norm=TRUE,
@@ -358,7 +358,7 @@ setMethod("gsva", signature(expr="ExpressionSet", gset.idx.list="list"),
 
   ## map to the actual features for which expression data is available
   mapped.gset.idx.list <- .mapGeneSetsToFeatures(gset.idx.list, rownames(expr))
-  
+
   ## remove gene sets from the analysis for which no features are available
   ## and meet the minimum and maximum gene-set size specified by the user
   mapped.gset.idx.list <- filterGeneSets(mapped.gset.idx.list,
@@ -377,7 +377,7 @@ setMethod("gsva", signature(expr="ExpressionSet", gset.idx.list="list"),
   }
 
   eSco <- .gsva(expr, mapped.gset.idx.list, method, kcdf, rnaseq, abs.ranking,
-                parallel.sz, mx.diff, tau, kernel, ssgsea.norm, verbose, BPPARAM) 
+                parallel.sz, mx.diff, tau, kernel, ssgsea.norm, verbose, BPPARAM)
 
   rval <- new("ExpressionSet", exprs=eSco, phenoData=phenoData(eset),
               experimentData=experimentData(eset), annotation="")
@@ -392,7 +392,7 @@ setMethod("gsva", signature(expr="ExpressionSet", gset.idx.list="GeneSetCollecti
   abs.ranking=FALSE,
   min.sz=1,
   max.sz=Inf,
-  parallel.sz=1L, 
+  parallel.sz=1L,
   mx.diff=TRUE,
   tau=switch(method, gsva=1, ssgsea=0.25, NA),
   ssgsea.norm=TRUE,
@@ -428,11 +428,11 @@ setMethod("gsva", signature(expr="ExpressionSet", gset.idx.list="GeneSetCollecti
         "Attempting to directly match identifiers in 'expr' to gene sets.", sep="\n")
     }
   }
-  mapped.gset.idx.list <- geneIds(mapped.gset.idx.list) 
+  mapped.gset.idx.list <- geneIds(mapped.gset.idx.list)
 
   ## map to the actual features for which expression data is available
   mapped.gset.idx.list <- .mapGeneSetsToFeatures(mapped.gset.idx.list, rownames(expr))
-  
+
   ## remove gene sets from the analysis for which no features are available
   ## and meet the minimum and maximum gene-set size specified by the user
   mapped.gset.idx.list <- filterGeneSets(mapped.gset.idx.list,
@@ -466,7 +466,7 @@ setMethod("gsva", signature(expr="matrix", gset.idx.list="GeneSetCollection"),
   abs.ranking=FALSE,
   min.sz=1,
   max.sz=Inf,
-  parallel.sz=1L, 
+  parallel.sz=1L,
   mx.diff=TRUE,
   tau=switch(method, gsva=1, ssgsea=0.25, NA),
   ssgsea.norm=TRUE,
@@ -490,10 +490,10 @@ setMethod("gsva", signature(expr="matrix", gset.idx.list="GeneSetCollection"),
                                            AnnoOrEntrezIdentifier(annotation))
   }
   mapped.gset.idx.list <- geneIds(mapped.gset.idx.list)
-  
+
   ## map to the actual features for which expression data is available
   mapped.gset.idx.list <- .mapGeneSetsToFeatures(mapped.gset.idx.list, rownames(expr))
-  
+
   ## remove gene sets from the analysis for which no features are available
   ## and meet the minimum and maximum gene-set size specified by the user
   mapped.gset.idx.list <- filterGeneSets(mapped.gset.idx.list,
@@ -525,7 +525,7 @@ setMethod("gsva", signature(expr="matrix", gset.idx.list="list"),
   abs.ranking=FALSE,
   min.sz=1,
   max.sz=Inf,
-  parallel.sz=1L, 
+  parallel.sz=1L,
   mx.diff=TRUE,
   tau=switch(method, gsva=1, ssgsea=0.25, NA),
   ssgsea.norm=TRUE,
@@ -541,7 +541,7 @@ setMethod("gsva", signature(expr="matrix", gset.idx.list="list"),
 
   ## map to the actual features for which expression data is available
   mapped.gset.idx.list <- .mapGeneSetsToFeatures(gset.idx.list, rownames(expr))
-  
+
   ## remove gene sets from the analysis for which no features are available
   ## and meet the minimum and maximum gene-set size specified by the user
   mapped.gset.idx.list <- filterGeneSets(mapped.gset.idx.list,
@@ -577,7 +577,7 @@ setMethod("gsva", signature(expr="matrix", gset.idx.list="list"),
   ssgsea.norm=TRUE,
   verbose=TRUE,
   BPPARAM=SerialParam(progressbar=verbose)) {
-  
+
   if(is(expr, "DelayedArray")){
     warning("Using 'DelayedArray' objects as input is still in an experimental stage.")
 
@@ -594,7 +594,7 @@ setMethod("gsva", signature(expr="matrix", gset.idx.list="list"),
   parallel.sz <- as.integer(parallel.sz)
   if (parallel.sz < 1L)
     parallel.sz <- 1L
-	
+
   ## because we keep the argument 'parallel.sz' for backwards compatibility
   ## we need to harmonize it with the contents of BPPARAM
   if (parallel.sz > 1L && class(BPPARAM) == "SerialParam") {
@@ -639,21 +639,21 @@ setMethod("gsva", signature(expr="matrix", gset.idx.list="list"),
 
 	if(verbose)
 		cat("Estimating GSVA scores for", length(gset.idx.list),"gene sets.\n")
-	
+
 	n.samples <- ncol(expr)
 	n.genes <- nrow(expr)
 	n.gset <- length(gset.idx.list)
-	
+
 	es.obs <- matrix(NaN, n.gset, n.samples, dimnames=list(names(gset.idx.list),colnames(expr)))
 	colnames(es.obs) <- colnames(expr)
 	rownames(es.obs) <- names(gset.idx.list)
-	
+
 	es.obs <- compute.geneset.es(expr, gset.idx.list, 1:n.samples,
                                rnaseq=rnaseq, abs.ranking=abs.ranking,
                                parallel.sz=parallel.sz,
                                mx.diff=mx.diff, tau=tau, kernel=kernel,
                                verbose=verbose, BPPARAM=BPPARAM)
-	
+
 	colnames(es.obs) <- colnames(expr)
 	rownames(es.obs) <- names(gset.idx.list)
 
@@ -665,7 +665,7 @@ compute.gene.density <- function(expr, sample.idxs, rnaseq=FALSE, kernel=TRUE){
 	n.test.samples <- ncol(expr)
 	n.genes <- nrow(expr)
 	n.density.samples <- length(sample.idxs)
-	
+
   gene.density <- NA
   if (kernel) {
 	  A = .C("matrix_density_R",
@@ -676,7 +676,7 @@ compute.gene.density <- function(expr, sample.idxs, rnaseq=FALSE, kernel=TRUE){
 			n.test.samples,
 			n.genes,
       as.integer(rnaseq))$R
-	
+
 	  gene.density <- t(matrix(A, n.test.samples, n.genes))
   } else {
     gene.density <- t(apply(expr, 1, function(x, sample.idxs) {
@@ -686,11 +686,11 @@ compute.gene.density <- function(expr, sample.idxs, rnaseq=FALSE, kernel=TRUE){
     gene.density <- log(gene.density / (1-gene.density))
   }
 
-	return(gene.density)	
+	return(gene.density)
 }
 
 compute.geneset.es <- function(expr, gset.idx.list, sample.idxs, rnaseq=FALSE,
-                               abs.ranking, parallel.sz=1L, 
+                               abs.ranking, parallel.sz=1L,
                                mx.diff=TRUE, tau=1, kernel=TRUE,
                                verbose=TRUE, BPPARAM=SerialParam(progressbar=verbose)) {
 	num_genes <- nrow(expr)
@@ -725,18 +725,18 @@ compute.geneset.es <- function(expr, gset.idx.list, sample.idxs, rnaseq=FALSE,
                               rnaseq=rnaseq, kernel=kernel,
                               REDUCE=rbind, reduce.in.order=TRUE,
                               BPPARAM=BPPARAM)
-  } else 
+  } else
 	  gene.density <- compute.gene.density(expr, sample.idxs, rnaseq, kernel)
-	
+
 	compute_rank_score <- function(sort_idx_vec){
 		tmp <- rep(0, num_genes)
 		tmp[sort_idx_vec] <- abs(seq(from=num_genes,to=1) - num_genes/2)
 		return (tmp)
 	}
-	
+
 	rank.scores <- rep(0, num_genes)
   sort.sgn.idxs <- apply(gene.density, 2, order, decreasing=TRUE) # n.genes * n.samples
-	
+
 	rank.scores <- apply(sort.sgn.idxs, 2, compute_rank_score)
 
   m <- bplapply(gset.idx.list, ks_test_m,
@@ -754,7 +754,7 @@ compute.geneset.es <- function(expr, gset.idx.list, sample.idxs, rnaseq=FALSE,
 
 ks_test_m <- function(gset_idxs, gene.density, sort.idxs, mx.diff=TRUE,
                       abs.ranking=FALSE, tau=1, verbose=TRUE){
-	
+
 	n.genes <- nrow(gene.density)
 	n.samples <- ncol(gene.density)
 	n.geneset <- length(gset_idxs)
@@ -777,35 +777,35 @@ ks_test_m <- function(gset_idxs, gene.density, sort.idxs, mx.diff=TRUE,
 
 ## ks-test in R code - testing only
 ks_test_Rcode <- function(gene.density, gset_idxs, tau=1, make.plot=FALSE){
-	
+
 	n.genes = length(gene.density)
 	n.gset = length(gset_idxs)
-	
+
 	sum.gset <- sum(abs(gene.density[gset_idxs])^tau)
-	
+
 	dec = 1 / (n.genes - n.gset)
-	
+
 	sort.idxs <- order(gene.density,decreasing=T)
 	offsets <- sort(match(gset_idxs, sort.idxs))
-	
+
 	last.idx = 0
 	values <- rep(NaN, length(gset_idxs))
 	current = 0
 	for(i in seq_along(offsets)){
 		current = current + abs(gene.density[sort.idxs[offsets[i]]])^tau / sum.gset - dec * (offsets[i]-last.idx-1)
-		
+
 		values[i] = current
 		last.idx = offsets[i]
 	}
 	check_zero = current - dec * (n.genes-last.idx)
-	#if(check_zero > 10^-15){ 
+	#if(check_zero > 10^-15){
 	#	stop(paste=c("Expected zero sum for ks:", check_zero))
 	#}
-	if(make.plot){ plot(offsets, values,type="l") } 
-	
+	if(make.plot){ plot(offsets, values,type="l") }
+
 	max.idx = order(abs(values),decreasing=T)[1]
 	mx.value <- values[max.idx]
-	
+
 	return (mx.value)
 }
 
@@ -814,7 +814,7 @@ ks_test_Rcode <- function(gene.density, gset_idxs, tau=1, make.plot=FALSE){
   indicatorFunInsideGeneSet <- match(geneRanking, gSetIdx)
   indicatorFunInsideGeneSet[!is.na(indicatorFunInsideGeneSet)] <- 1
   indicatorFunInsideGeneSet[is.na(indicatorFunInsideGeneSet)] <- 0
-  stepCDFinGeneSet <- cumsum((abs(R[geneRanking, j])^alpha * 
+  stepCDFinGeneSet <- cumsum((abs(R[geneRanking, j])^alpha *
                       indicatorFunInsideGeneSet)) /
                       sum((abs(R[geneRanking, j])^alpha *
                       indicatorFunInsideGeneSet))
@@ -822,7 +822,7 @@ ks_test_Rcode <- function(gene.density, gset_idxs, tau=1, make.plot=FALSE){
                        sum(!indicatorFunInsideGeneSet)
   walkStat <- stepCDFinGeneSet - stepCDFoutGeneSet
 
-  sum(walkStat) 
+  sum(walkStat)
 }
 
 ## optimized version of the function .rndWalk by Alexey Sergushichev
@@ -832,14 +832,14 @@ ks_test_Rcode <- function(gene.density, gset_idxs, tau=1, make.plot=FALSE){
     n <- length(geneRanking)
     k <- length(gSetIdx)
     idxs <- sort.int(match(gSetIdx, geneRanking))
-    
-    stepCDFinGeneSet2 <- 
+
+    stepCDFinGeneSet2 <-
         sum(Ra[geneRanking[idxs], j] * (n - idxs + 1)) /
-        sum((Ra[geneRanking[idxs], j]))    
-    
-    
+        sum((Ra[geneRanking[idxs], j]))
+
+
     stepCDFoutGeneSet2 <- (n * (n + 1) / 2 - sum(n - idxs + 1)) / (n - k)
-    
+
     walkStat <- stepCDFinGeneSet2 - stepCDFoutGeneSet2
 
     walkStat
@@ -851,26 +851,26 @@ ssgsea <- function(X, geneSets, alpha=0.25, parallel.sz,
                    BPPARAM=SerialParam(progressbar=verbose)) {
 
   n <- ncol(X)
-  
+
   print("Calculating ranks...")
-  
+
   R <- t(sparseMatrixStats::colRanks(X, ties.method = "average"))
   mode(R) <- "integer"
 
   print("Calculating absolute values from ranks...")
-  
+
   Ra <- abs(R)^alpha
-  
+
   es <- bplapply(as.list(1:n), function(j) {
     geneRanking <- order(R[, j], decreasing=TRUE)
     es_sample <- lapply(geneSets, .fastRndWalk, geneRanking, j, Ra)
-    
+
     unlist(es_sample)
   }, BPPARAM=BPPARAM)
-  
+
   es <- do.call("cbind", es)
-  
-  
+
+
   if (normalization) {
     print("Normalizing...")
     ## normalize enrichment scores by using the entire data set, as indicated
@@ -878,17 +878,20 @@ ssgsea <- function(X, geneSets, alpha=0.25, parallel.sz,
     # es <- apply(es, 2, function(x, es) x / (range(es)[2] - range(es)[1]), es)
     es <- es[,1:n] / (range(es)[2] - range(es)[1])
   }
-  
+
   if (length(geneSets) == 1)
     es <- matrix(es, nrow=1)
-  
+
+  if (n == 1 && !is.matrix(es))
+    es <- matrix(es, ncol=1, dimnames=list(names(es), colnames(X)))
+
   rownames(es) <- names(geneSets)
   colnames(es) <- colnames(X)
-  
+
   if(is(X, "dgCMatrix")){
     es <- as(es, "dgCMatrix")
   }
-  
+
   es
 }
 
@@ -902,13 +905,13 @@ zscore <- function(X, geneSets, parallel.sz, verbose=TRUE,
   if(is(X, "dgCMatrix")){
     message("Please bear in mind that this method first scales the values of the gene
     expression data. In order to take advantage of the sparse Matrix type, the scaling
-    will only be applied to the non-zero values of the data. This is a provisional 
+    will only be applied to the non-zero values of the data. This is a provisional
     solution in order to give support to the dgCMatrix format.")
-    
+
     Z <- t(X)
     Z <- .dgCapply(Z, scale, 2)
     Z <- t(Z)
-    
+
   } else {
     Z <- t(scale(t(X)))
   }
@@ -919,7 +922,7 @@ zscore <- function(X, geneSets, parallel.sz, verbose=TRUE,
   }, Z, geneSets, BPPARAM=BPPARAM)
 
   es <- do.call("cbind", es)
-  
+
   if(is(X, "dgCMatrix")){
     es <- as(es, "dgCMatrix")
   }
@@ -944,36 +947,36 @@ plage <- function(X, geneSets, parallel.sz, verbose=TRUE,
   if(is(X, "dgCMatrix")){
     message("Please bear in mind that this method first scales the values of the gene
     expression data. In order to take advantage of the sparse Matrix type, the scaling
-    will only be applied to the non-zero values of the data. This is a provisional 
+    will only be applied to the non-zero values of the data. This is a provisional
     solution in order to give support to the dgCMatrix format.")
-    
+
     Z <- Matrix::t(X)
     Z <- .dgCapply(Z, scale, 2)
     Z <- Matrix::t(Z)
-    
+
     es <- bplapply(geneSets, rightsingularsvdvectorgset, Z,
                    BPPARAM=BPPARAM)
-    
+
     es <- do.call(rbind, es)
-    
+
     es <- as(es, "dgCMatrix")
-    
+
   } else {
-    
+
     Z <- t(scale(t(X)))
-    
+
     es <- bplapply(geneSets, rightsingularsvdvectorgset, Z,
                    BPPARAM=BPPARAM)
-    
+
     es <- do.call(rbind, es)
-    
+
     if (length(geneSets) == 1)
       es <- matrix(es, nrow=1)
-    
+
     rownames(es) <- names(geneSets)
     colnames(es) <- colnames(X)
   }
-  
+
   es
 }
 
@@ -982,7 +985,7 @@ setGeneric("filterGeneSets", function(gSets, ...) standardGeneric("filterGeneSet
 setMethod("filterGeneSets", signature(gSets="list"),
           function(gSets, min.sz=1, max.sz=Inf) {
 	gSetsLen <- lengths(gSets)
-	return (gSets[gSetsLen >= min.sz & gSetsLen <= max.sz])	
+	return (gSets[gSetsLen >= min.sz & gSetsLen <= max.sz])
 })
 
 setMethod("filterGeneSets", signature(gSets="GeneSetCollection"),
@@ -1046,7 +1049,7 @@ setMethod("computeGeneSetsOverlap", signature(gSets="GeneSetCollection", uniqGen
   ## Biobase::annotation() is necessary to disambiguate from the
   ## 'annotation' argument
   gSets <- mapIdentifiers(gSets, AnnoOrEntrezIdentifier(Biobase::annotation(uniqGenes)))
-  
+
   uniqGenes <- featureNames(uniqGenes)
 
   gSetsMembershipMatrix <- incidence(gSets)
@@ -1127,13 +1130,13 @@ compute.gset.overlap.score <- function(gset.idxs){
 	n <- length(gset.idxs)
 	mx.idx <- max(unlist(gset.idxs, use.names=F))
 	l <- c(sapply(gset.idxs, length))
-	
+
 	gset.M <- matrix(0, nrow=mx.idx, ncol=n)
 	for(i in 1:n){
 		gset.M[gset.idxs[[i]],i] = 1
 	}
 	M <- t(gset.M) %*% gset.M
-	
+
 	M1 <- matrix(l, nrow=n, ncol=n)
 	M2 <- t(M1)
 	M.min <- matrix(0, nrow=n, ncol=n)
