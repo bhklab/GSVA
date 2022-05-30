@@ -880,7 +880,7 @@ ssgsea <- function(X, geneSets, alpha=0.25, parallel.sz,
   }
 
   if (length(geneSets) == 1)
-    es <- matrix(es, nrow=1)
+    es <- matrix(es, nrow=1, dimnames=list(names(es), colnames(X)))
 
   if (n == 1 && !is.matrix(es))
     es <- matrix(es, ncol=1, dimnames=list(names(es), colnames(X)))
